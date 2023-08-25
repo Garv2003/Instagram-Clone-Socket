@@ -1,16 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
 
-app.use(cors());
-app.use(express.json());
-
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Server started on ${process.env.PORT}`)
-);
-const io = socket(server, {
+const io = socket(4444, {
   cors: {
     origin: "http://localhost:3000",
     credentials: true,
@@ -20,14 +11,13 @@ const io = socket(server, {
 let users = [];
 
 const adduser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
+  !users.some((user) => {
+    user.userId === userId;
+  }) && users.push({ userId, socketId });
 };
 
 const getuser = (userId) => {
-  return users.find((user) => {
-    user.userId === userId;
-  });
+  return users.find((user) => user.userId === userId);
 };
 
 const removeuser = (socketId) => {
@@ -38,14 +28,20 @@ const removeuser = (socketId) => {
 
 io.on("connection", (socket) => {
   console.log("user connected");
+
   socket.on("adduser", (userId) => {
     adduser(userId, socket.id);
+    console.log(users);
     io.emit("getusers", users);
   });
+
   socket.on("sendmessage", ({ senderId, receiverId, text }) => {
-    let user = users.find((user) => user.userId === receiverId);
-    io.to(user.socketId).emit("getmessage", { senderId, text });
+    // let user = users.find((user) => user.userId === receiverId);
+    let user = getuser(receiverId);
+    console.log({ senderId, receiverId, text, user });
+    io.to(user?.socketId).emit("getmessage", { senderId, text });
   });
+
   socket.on("disconnect", () => {
     console.log("user disconnected");
     removeuser(socket.id);
