@@ -35,11 +35,16 @@ io.on("connection", (socket) => {
     io.emit("getusers", users);
   });
 
-  socket.on("sendmessage", ({ senderId, receiverId, text }) => {
-    // let user = users.find((user) => user.userId === receiverId);
-    let user = getuser(receiverId);
-    console.log({ senderId, receiverId, text, user });
-    io.to(user?.socketId).emit("getmessage", { senderId, text });
+  socket.on("sendmessage", ({ senderId, receiverId, text, createdAt }) => {
+    // let user = getuser(receiverId);
+    let user = users.find((user) => user.userId === receiverId);
+    io.to(user?.socketId).emit("getmessage", { senderId, text, createdAt });
+  });
+
+  socket.on("typing", (data) => {
+    console.log(data);
+    let user = users.find((user) => user.userId === data.receiverId);
+    io.to(user?.socketId).emit("typingResponse", data);
   });
 
   socket.on("disconnect", () => {
