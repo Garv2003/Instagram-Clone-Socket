@@ -11,9 +11,9 @@ const io = socket(4444, {
 let users = [];
 
 const adduser = (userId, socketId) => {
-  !users.some((user) => {
-    user.userId === userId;
-  }) && users.push({ userId, socketId });
+  if (!users.some((user) => user.userId === userId)) {
+    users.push({ userId, socketId });
+  }
 };
 
 const getuser = (userId) => {
@@ -21,9 +21,7 @@ const getuser = (userId) => {
 };
 
 const removeuser = (socketId) => {
-  users = users.filter((user) => {
-    user.socketId !== socketId;
-  });
+  users = users.filter((user) => user.socketId !== socketId);
 };
 
 io.on("connection", (socket) => {
@@ -36,7 +34,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendmessage", ({ senderId, receiverId, text, createdAt }) => {
-    // let user = getuser(receiverId);
     let user = users.find((user) => user.userId === receiverId);
     io.to(user?.socketId).emit("getmessage", { senderId, text, createdAt });
   });
