@@ -26,10 +26,8 @@ const removeuser = (socketId) => {
 
 io.on("connection", (socket) => {
   console.log("user connected");
-
   socket.on("adduser", (userId) => {
     adduser(userId, socket.id);
-    console.log(users);
     io.emit("getusers", users);
   });
 
@@ -39,7 +37,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("typing", (data) => {
-    console.log(data);
     let user = users.find((user) => user.userId === data.receiverId);
     io.to(user?.socketId).emit("typingResponse", data);
   });
