@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const io = socket(4444, {
   cors: {
+    origin: "http://localhost:3000",
     credentials: true,
   },
 });
