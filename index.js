@@ -31,6 +31,15 @@ io.on("connection", (socket) => {
     io.emit("getusers", users);
   });
 
+  socket.on("joinroom", (roomId) => {
+    socket.join(roomId);
+    socket.broadcast.to(roomId).emit("userjoined", userId);
+  });
+
+  socket.on("sendmessageRoom", ({ senderId, roomId, text, createdAt }) => {
+    io.to(roomId).emit("getmessageRoom", { senderId, text, createdAt });
+  });
+
   socket.on("sendmessage", ({ senderId, receiverId, text, createdAt }) => {
     let user = users.find((user) => user.userId === receiverId);
     io.to(user?.socketId).emit("getmessage", { senderId, text, createdAt });
