@@ -1,7 +1,28 @@
 const socket = require("socket.io");
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const mongoose = require("mongoose");
+const helmet = require("helmet");
+const compression = require("compression");
+
+const app = express();
+const server = require("http").createServer(app);
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
+app.use(helmet());
+app.use(compression());
+app.use(morgan("common"));
+app.use(express.json());
+
 require("dotenv").config();
 
-const io = socket(4444, {
+const io = socket(server, {
   cors: {
     origin: process.env.CLIENT_URL,
     credentials: true,
@@ -55,4 +76,8 @@ io.on("connection", (socket) => {
     removeuser(socket.id);
     io.emit("getusers", users);
   });
+});
+
+server.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
